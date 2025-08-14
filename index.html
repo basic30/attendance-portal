@@ -133,37 +133,54 @@ const body = document.getElementById('calendar-body');
     }
 
     function updateCalendar() {
-        generateCalendar(currentYear, currentMonth);
-        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dateStr = new Date(currentYear, currentMonth, day).toISOString().slice(0, 10);
-            const numClasses = classes[dateStr] || 0;
-            let display = '';
-            let colorClass = '';
-            if (numClasses > 0) {
-                if (isAdmin) {
-                    display = numClasses;
-                    colorClass = 'blue';
+    generateCalendar(currentYear, currentMonth);
+
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const fromDate = document.getElementById('from-date').value;
+    const toDate = document.getElementById('to-date').value;
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = new Date(currentYear, currentMonth, day).toISOString().slice(0, 10);
+        const td = document.getElementById('day-' + day);
+        const numClasses = classes[dateStr] || 0;
+        let display = '';
+        let colorClass = '';
+
+        // Disable if outside range or future
+        let isDisabled = (dateStr < fromDate || dateStr > toDate || dateStr > todayStr);
+
+        if (numClasses > 0) {
+            if (isAdmin) {
+                display = numClasses;
+                colorClass = 'blue';
+            } else {
+                const numAtt = attended[dateStr] || 0;
+                display = numAtt + '/' + numClasses;
+                if (numAtt === numClasses) {
+                    colorClass = 'green';
+                } else if (numAtt > 0) {
+                    colorClass = 'yellow';
                 } else {
-                    const numAtt = attended[dateStr] || 0;
-                    display = numAtt + '/' + numClasses;
-                    if (numAtt === numClasses) {
-                        colorClass = 'green';
-                    } else if (numAtt > 0) {
-                        colorClass = 'yellow';
-                    } else {
-                        colorClass = 'red';
-                    }
+                    colorClass = 'red';
                 }
             }
-            const td = document.getElementById('day-' + day);
-            td.innerHTML = `
-                <div class="day-number">${day}</div>
-                ${display ? `<span class="attendance ${colorClass}">${display}</span>` : ''}
-            `;
+        }
+
+        td.innerHTML = `
+            <div class="day-number">${day}</div>
+            ${display ? `<span class="attendance ${colorClass}">${display}</span>` : ''}
+        `;
+
+        if (isDisabled && !isAdmin) {
+            td.classList.add('disabled-day');
+            td.onclick = null; // remove click action
+        } else {
+            td.classList.remove('disabled-day');
+            td.onclick = () => handleClick(day);
         }
     }
-
+}
     function handleClick(day) {
         const dateStr = new Date(currentYear, currentMonth, day).toISOString().slice(0, 10);
         if (isAdmin) {
@@ -254,6 +271,7 @@ totalClasses += nc;
     <!-- <script src="script.js"></script> -->
 </body>
 </html>
+
 
 
 
