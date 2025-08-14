@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Portal</title>
     <link rel="stylesheet" href="styles.css">
-   <script type="module">
-        // Import Firebase SDKs
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  <script type="module">
+    // Import Firebase SDKs (already included above)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-        // Your Firebase configuration
-        const firebaseConfig = {
+    // Your Firebase configuration
+    const firebaseConfig = {
     // Replace with your own Firebase config
     apiKey: "AIzaSyBimjSAEhXgUr8XiJcdU5qMAmqBoZD7zBc",
     authDomain: "attendanceportal-c745d.firebaseapp.com",
@@ -23,246 +23,196 @@
     appId: "1:18278101782:web:f1877ef2ddef8268c89637"
 };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-        const provider = new GoogleAuthProvider();
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const provider = new GoogleAuthProvider();
 
-        let currentUser;
-        let isAdmin = false;
-        let classes = {};
-        let attended = {};
-        let currentYear = new Date().getFullYear();
-        let currentMonth = new Date().getMonth();
+    let currentUser;
+    let isAdmin = false;
+    let classes = {};
+    let attended = {};
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth();
 
-        const adminEmail = 'snahasishdey143@gmail.com'; // Replace with your admin email
+    const adminEmail = 'snahasishdey143@gmail.com'; // Replace with your admin email
 
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                currentUser = user;
-                isAdmin = user.email === adminEmail;
-                document.getElementById('login').hidden = true;
-                document.getElementById('dashboard').hidden = false;
-                document.getElementById('user-name').textContent = user.displayName || user.email;
-                setPeriod(currentYear, currentMonth);
-                onValue(ref(db, 'classes'), snap => {
-                    classes = snap.val() || {};
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            currentUser = user;
+            isAdmin = user.email === adminEmail;
+            document.getElementById('login').hidden = true;
+            document.getElementById('dashboard').hidden = false;
+            document.getElementById('user-name').textContent = user.displayName;
+            setPeriod(currentYear, currentMonth);
+            onValue(ref(db, 'classes'), snap => {
+                classes = snap.val() || {};
+                updateCalendar();
+                updatePercentage();
+            });
+            if (!isAdmin) {
+                onValue(ref(db, 'attendance/' + user.uid), snap => {
+                    attended = snap.val() || {};
                     updateCalendar();
                     updatePercentage();
                 });
-                if (!isAdmin) {
-                    onValue(ref(db, 'attendance/' + user.uid), snap => {
-                        attended = snap.val() || {};
-                        updateCalendar();
-                        updatePercentage();
-                    });
-                    document.getElementById('percentage').style.display = 'block';
-                } else {
-                    document.getElementById('percentage').style.display = 'none';
-                }
-                updateCalendar();
+                document.getElementById('percentage').style.display = 'block';
             } else {
-                document.getElementById('login').hidden = false;
-                document.getElementById('dashboard').hidden = true;
+                document.getElementById('percentage').style.display = 'none';
             }
-        });
-
-        document.getElementById('google-login').onclick = () => {
-            signInWithPopup(auth, provider);
-        };
-
-        document.getElementById('logout').onclick = () => {
-            signOut(auth);
-        };
-
-        document.getElementById('prev-month').onclick = () => {
-            currentMonth--;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            setPeriod(currentYear, currentMonth);
             updateCalendar();
-        };
-
-        document.getElementById('next-month').onclick = () => {
-            currentMonth++;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            setPeriod(currentYear, currentMonth);
-            updateCalendar();
-        };
-
-        document.getElementById('from-date').onchange = updatePercentage;
-        document.getElementById('to-date').onchange = updatePercentage;
-
-        function setPeriod(year, month) {
-            const fromDate = new Date(year, month, 1).toISOString().slice(0, 10);
-            const toDate = new Date(year, month + 1, 0).toISOString().slice(0, 10);
-            document.getElementById('from-date').value = fromDate;
-            document.getElementById('to-date').value = toDate;
-        }
-
-        function generateCalendar(year, month) {
-            document.getElementById('month-year').textContent = new Date(year, month).toLocaleString('default', { month: 'long' }) + ' ' + year;
-            const body = document.getElementById('calendar-body');
-            body.innerHTML = '';
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            let row = document.createElement('tr');
-            let cellCount = 0;
-            for (let i = 0; i < firstDay; i++) {
-                row.appendChild(document.createElement('td'));
-                cellCount++;
-            }
-            for (let day = 1; day <= daysInMonth; day++) {
-                const td = document.createElement('td');
-                td.id = 'day-' + day;
-                td.onclick = () => handleClick(day);
-                row.appendChild(td);
-                cellCount++;
-                if (cellCount % 7 === 0 || day === daysInMonth) {
-                    body.appendChild(row);
-                    row = document.createElement('tr');
-                    cellCount = 0;
-                }
-            }
-        }
-
-        function updateCalendar() {
-            generateCalendar(currentYear, currentMonth);
-            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            const today = new Date().toISOString().slice(0, 10);
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = new Date(currentYear, currentMonth, day).toISOString().slice(0, 10);
-                const classData = classes[dateStr] || [];
-                let display = '';
-                let colorClass = '';
-                if (classData.length > 0) {
-                    if (isAdmin) {
-                        display = classData.map(c => `${c.count} (${c.name})`).join(', ');
-                        colorClass = 'blue';
-                    } else {
-                        let totalCount = classData.reduce((sum, c) => sum + c.count, 0);
-                        let totalAttended = 0;
-                        classData.forEach(c => {
-                            totalAttended += attended[dateStr + '_' + c.name] || 0;
-                        });
-                        display = classData.map(c => {
-                            const att = attended[dateStr + '_' + c.name] || 0;
-                            return `${att}/${c.count} (${c.name})`;
-                        }).join(', ');
-                        if (totalAttended === totalCount) {
-                            colorClass = 'green';
-                        } else if (totalAttended > 0) {
-                            colorClass = 'yellow';
-                        } else {
-                            colorClass = 'red';
-                        }
-                    }
-                }
-                const td = document.getElementById('day-' + day);
-                td.innerHTML = `
-                    <div class="day-number">${day}</div>
-                    ${display ? `<span class="attendance ${colorClass}">${display}</span>` : ''}
-                `;
-                if (!isAdmin && dateStr !== today && (dateStr < today || !classData.length)) {
-                    td.style.cursor = 'not-allowed';
-                    td.onclick = null; // Disable click if not today or no classes
-                }
-            }
-        }
-
-        function handleClick(day) {
-    const dateStr = new Date(currentYear, currentMonth, day).toISOString().slice(0, 10);
-    const today = new Date().toISOString().slice(0, 10);
-    if (isAdmin) {
-        const currentData = classes[dateStr] || [];
-        const currentStr = currentData.map(c => `${c.count} ${c.name}`).join(', ') || 'No classes';
-        const input = prompt(`Enter classes for ${dateStr}\nCurrent: ${currentStr}\nEnter as: count1 name1, count2 name2 (e.g., 3 Math, 2 Physics):`, currentStr);
-        if (input !== null) {
-            const classInputs = input.split(',').map(s => s.trim()).filter(s => s);
-            const newClasses = classInputs.map(s => {
-                const [countStr, name] = s.split(' ', 2);
-                const count = parseInt(countStr);
-                if (isNaN(count) || count < 0) {
-                    alert('Invalid count. Please enter a non-negative number.');
-                    return null;
-                }
-                if (!name || name.trim() === '') {
-                    alert('Please provide a class name.');
-                    return null;
-                }
-                return { count: count, name: name.trim() };
-            }).filter(c => c !== null);
-            if (newClasses.length > 0) {
-                set(ref(db, 'classes/' + dateStr), newClasses);
-            } else {
-                alert('No valid classes entered.');
-            }
-        }
-    } else {
-        const classData = classes[dateStr] || [];
-        if (classData.length > 0 && dateStr <= today) {
-            let attendanceInput = '';
-            classData.forEach(c => {
-                const currentAtt = attended[dateStr + '_' + c.name] || 0;
-                attendanceInput += `${c.name}: ${currentAtt}/${c.count}\n`;
-            });
-            const input = prompt(`Mark attendance for ${dateStr}\n${attendanceInput}Enter as: name1 value1, name2 value2 (e.g., Math 2, Physics 1):`, attendanceInput);
-            if (input !== null) {
-                const attInputs = input.split(',').map(s => s.trim()).filter(s => s);
-                const newAttendance = {};
-                attInputs.forEach(s => {
-                    const [name, valueStr] = s.split(' ', 2);
-                    const value = parseInt(valueStr);
-                    const cls = classData.find(c => c.name === name);
-                    if (cls && !isNaN(value) && value >= 0 && value <= cls.count) {
-                        newAttendance[dateStr + '_' + name] = value;
-                    } else {
-                        alert(`Invalid attendance for ${name}. Value must be between 0 and ${cls?.count || 0}.`);
-                    }
-                });
-                for (let key in newAttendance) {
-                    set(ref(db, 'attendance/' + currentUser.uid + '/' + key), newAttendance[key]);
-                }
-            }
-        } else if (dateStr > today) {
-            alert('Cannot mark attendance for future dates.');
         } else {
-            alert('No classes scheduled for this date.');
+            document.getElementById('login').hidden = false;
+            document.getElementById('dashboard').hidden = true;
+        }
+    });
+
+    document.getElementById('google-login').onclick = () => {
+        signInWithPopup(auth, provider);
+    };
+
+    document.getElementById('logout').onclick = () => {
+        signOut(auth);
+    };
+
+    document.getElementById('prev-month').onclick = () => {
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
+        setPeriod(currentYear, currentMonth);
+        updateCalendar();
+    };
+
+    document.getElementById('next-month').onclick = () => {
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        setPeriod(currentYear, currentMonth);
+        updateCalendar();
+    };
+
+    document.getElementById('from-date').onchange = updatePercentage;
+    document.getElementById('to-date').onchange = updatePercentage;
+
+    function setPeriod(year, month) {
+        const fromDate = new Date(year, month, 1).toISOString().slice(0, 10);
+        const toDate = new Date(year, month + 1, 0).toISOString().slice(0, 10);
+        document.getElementById('from-date').value = fromDate;
+        document.getElementById('to-date').value = toDate;
+    }
+
+    function generateCalendar(year, month) {
+        document.getElementById('month-year').textContent = new Date(year, month).toLocaleString('default', { month: 'long' }) + ' ' + year;
+const body = document.getElementById('calendar-body');
+        body.innerHTML = '';
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        let row = document.createElement('tr');
+        let cellCount = 0;
+        for (let i = 0; i < firstDay; i++) {
+            row.appendChild(document.createElement('td'));
+            cellCount++;
+        }
+        for (let day = 1; day <= daysInMonth; day++) {
+            const td = document.createElement('td');
+            td.id = 'day-' + day;
+            td.onclick = () => handleClick(day);
+            row.appendChild(td);
+            cellCount++;
+            if (cellCount % 7 === 0 || day === daysInMonth) {
+                body.appendChild(row);
+                row = document.createElement('tr');
+                cellCount = 0;
+            }
         }
     }
-}
 
-        function updatePercentage() {
-            if (isAdmin) return;
-            const from = document.getElementById('from-date').value;
-            const to = document.getElementById('to-date').value;
-            if (!from || !to) return;
-            const startDate = new Date(from);
-            const endDate = new Date(to);
-            let totalClasses = 0;
-            let totalAttended = 0;
-            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                const dateStr = d.toISOString().slice(0, 10);
-                const classData = classes[dateStr] || [];
-                totalClasses += classData.reduce((sum, c) => sum + c.count, 0);
-                classData.forEach(c => {
-                    totalAttended += attended[dateStr + '_' + c.name] || 0;
-                });
+    function updateCalendar() {
+        generateCalendar(currentYear, currentMonth);
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = new Date(currentYear, currentMonth, day).toISOString().slice(0, 10);
+            const numClasses = classes[dateStr] || 0;
+            let display = '';
+            let colorClass = '';
+            if (numClasses > 0) {
+                if (isAdmin) {
+                    display = numClasses;
+                    colorClass = 'blue';
+                } else {
+                    const numAtt = attended[dateStr] || 0;
+                    display = numAtt + '/' + numClasses;
+                    if (numAtt === numClasses) {
+                        colorClass = 'green';
+                    } else if (numAtt > 0) {
+                        colorClass = 'yellow';
+                    } else {
+                        colorClass = 'red';
+                    }
+                }
             }
-            const percentage = totalClasses > 0 ? (totalAttended / totalClasses * 100).toFixed(2) : 0;
-            document.getElementById('percentage').innerHTML = `
-                <div class="pie">
-                    ${totalAttended}/${totalClasses} (${percentage}%)
-                </div>
+            const td = document.getElementById('day-' + day);
+            td.innerHTML = `
+                <div class="day-number">${day}</div>
+                ${display ? `<span class="attendance ${colorClass}">${display}</span>` : ''}
             `;
         }
-    </script>
+    }
+
+    function handleClick(day) {
+        const dateStr = new Date(currentYear, currentMonth, day).toISOString().slice(0, 10);
+        if (isAdmin) {
+            const num = prompt(`Enter number of classes for ${dateStr}, classes[dateStr] || 0`);
+            if (num !== null) {
+                const n = parseInt(num);
+                if (!isNaN(n) && n >= 0) {
+                    set(ref(db, 'classes/' + dateStr), n);
+                }
+            }
+        } else {
+            const numClasses = classes[dateStr] || 0;
+            if (numClasses > 0) {
+                const num = prompt(`Enter number of classes attended (0 to ${numClasses}), attended[dateStr] || 0`);
+                if (num !== null) {
+                    const n = parseInt(num);
+                    if (!isNaN(n) && n >= 0 && n <= numClasses) {
+                        set(ref(db, 'attendance/' + currentUser.uid + '/' + dateStr), n);
+                    }
+                }
+            } else {
+                alert('No classes scheduled for this date.');
+            }
+        }
+    }
+
+    function updatePercentage() {
+        if (isAdmin) return;
+        const from = document.getElementById('from-date').value;
+        const to = document.getElementById('to-date').value;
+        if (!from || !to) return;
+        const startDate = new Date(from);
+        const endDate = new Date(to);
+        let totalClasses = 0;
+        let totalAttended = 0;
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+            const dateStr = d.toISOString().slice(0, 10);
+            const nc = classes[dateStr] || 0;
+totalClasses += nc;
+            totalAttended += attended[dateStr] || 0;
+        }
+        const percentage = totalClasses > 0 ? (totalAttended / totalClasses * 100).toFixed(2) : 0;
+        document.getElementById('percentage').innerHTML = `
+            <div class="pie">
+                ${totalAttended}/${totalClasses}
+            </div>
+        `;
+    }
+</script>
 </head>
 <body>
     <div id="login">
@@ -304,5 +254,6 @@
     <!-- <script src="script.js"></script> -->
 </body>
 </html>
+
 
 
