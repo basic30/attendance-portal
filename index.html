@@ -177,54 +177,66 @@
         }
 
         function handleClick(day) {
-            const dateStr = new Date(currentYear, currentMonth, day).toISOString().slice(0, 10);
-            const today = new Date().toISOString().slice(0, 10);
-            if (isAdmin) {
-                const currentData = classes[dateStr] || [];
-                const currentStr = currentData.map(c => `${c.count} ${c.name}`).join(', ') || 'No classes';
-                const input = prompt(`Enter classes for ${dateStr}\nCurrent: ${currentStr}\nEnter as: count1 name1, count2 name2 (e.g., 3 Math, 2 Physics):`, currentStr);
-                if (input !== null) {
-                    const classInputs = input.split(',').map(s => s.trim()).filter(s => s);
-                    const newClasses = classInputs.map(s => {
-                        const [countStr, name] = s.split(' ', 2);
-                        const count = parseInt(countStr);
-                        return { count: !isNaN(count) && count >= 0 ? count : 0, name: name || '' };
-                    });
-                    if (newClasses.length > 0) {
-                        set(ref(db, 'classes/' + dateStr), newClasses);
-                    }
+    const dateStr = new Date(currentYear, currentMonth, day).toISOString().slice(0, 10);
+    const today = new Date().toISOString().slice(0, 10);
+    if (isAdmin) {
+        const currentData = classes[dateStr] || [];
+        const currentStr = currentData.map(c => `${c.count} ${c.name}`).join(', ') || 'No classes';
+        const input = prompt(`Enter classes for ${dateStr}\nCurrent: ${currentStr}\nEnter as: count1 name1, count2 name2 (e.g., 3 Math, 2 Physics):`, currentStr);
+        if (input !== null) {
+            const classInputs = input.split(',').map(s => s.trim()).filter(s => s);
+            const newClasses = classInputs.map(s => {
+                const [countStr, name] = s.split(' ', 2);
+                const count = parseInt(countStr);
+                if (isNaN(count) || count < 0) {
+                    alert('Invalid count. Please enter a non-negative number.');
+                    return null;
                 }
+                if (!name || name.trim() === '') {
+                    alert('Please provide a class name.');
+                    return null;
+                }
+                return { count: count, name: name.trim() };
+            }).filter(c => c !== null);
+            if (newClasses.length > 0) {
+                set(ref(db, 'classes/' + dateStr), newClasses);
             } else {
-                const classData = classes[dateStr] || [];
-                if (classData.length > 0 && dateStr <= today) {
-                    let attendanceInput = '';
-                    classData.forEach(c => {
-                        const currentAtt = attended[dateStr + '_' + c.name] || 0;
-                        attendanceInput += `${c.name}: ${currentAtt}/${c.count}\n`;
-                    });
-                    const input = prompt(`Mark attendance for ${dateStr}\n${attendanceInput}Enter as: name1 value1, name2 value2 (e.g., Math 2, Physics 1):`, attendanceInput);
-                    if (input !== null) {
-                        const attInputs = input.split(',').map(s => s.trim()).filter(s => s);
-                        const newAttendance = {};
-                        attInputs.forEach(s => {
-                            const [name, valueStr] = s.split(' ', 2);
-                            const value = parseInt(valueStr);
-                            const cls = classData.find(c => c.name === name);
-                            if (cls && !isNaN(value) && value >= 0 && value <= cls.count) {
-                                newAttendance[dateStr + '_' + name] = value;
-                            }
-                        });
-                        for (let key in newAttendance) {
-                            set(ref(db, 'attendance/' + currentUser.uid + '/' + key), newAttendance[key]);
-                        }
-                    }
-                } else if (dateStr > today) {
-                    alert('Cannot mark attendance for future dates.');
-                } else {
-                    alert('No classes scheduled for this date.');
-                }
+                alert('No valid classes entered.');
             }
         }
+    } else {
+        const classData = classes[dateStr] || [];
+        if (classData.length > 0 && dateStr <= today) {
+            let attendanceInput = '';
+            classData.forEach(c => {
+                const currentAtt = attended[dateStr + '_' + c.name] || 0;
+                attendanceInput += `${c.name}: ${currentAtt}/${c.count}\n`;
+            });
+            const input = prompt(`Mark attendance for ${dateStr}\n${attendanceInput}Enter as: name1 value1, name2 value2 (e.g., Math 2, Physics 1):`, attendanceInput);
+            if (input !== null) {
+                const attInputs = input.split(',').map(s => s.trim()).filter(s => s);
+                const newAttendance = {};
+                attInputs.forEach(s => {
+                    const [name, valueStr] = s.split(' ', 2);
+                    const value = parseInt(valueStr);
+                    const cls = classData.find(c => c.name === name);
+                    if (cls && !isNaN(value) && value >= 0 && value <= cls.count) {
+                        newAttendance[dateStr + '_' + name] = value;
+                    } else {
+                        alert(`Invalid attendance for ${name}. Value must be between 0 and ${cls?.count || 0}.`);
+                    }
+                });
+                for (let key in newAttendance) {
+                    set(ref(db, 'attendance/' + currentUser.uid + '/' + key), newAttendance[key]);
+                }
+            }
+        } else if (dateStr > today) {
+            alert('Cannot mark attendance for future dates.');
+        } else {
+            alert('No classes scheduled for this date.');
+        }
+    }
+}
 
         function updatePercentage() {
             if (isAdmin) return;
@@ -292,4 +304,5 @@
     <!-- <script src="script.js"></script> -->
 </body>
 </html>
+
 
