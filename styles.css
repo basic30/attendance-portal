@@ -1,67 +1,121 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #e0f7fa, #ffffff);
     margin: 0;
     padding: 20px;
+    color: #333;
 }
 
 #login {
     text-align: center;
     margin-top: 100px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#login h1 {
+    margin: 0 0 20px;
+    color: #3f51b5;
 }
 
 #login button {
-    padding: 10px 20px;
-    background-color: #4285f4;
+    padding: 12px 25px;
+    background-color: #3f51b5;
     color: white;
     border: none;
+    border-radius: 5px;
     cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#login button:hover {
+    background-color: #303f9f;
 }
 
 header {
-    background-color: #3f51b5;
+    background: linear-gradient(90deg, #3f51b5, #5c6bc0);
     color: white;
-    padding: 10px;
+    padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-radius: 5px 5px 0 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+header button {
+    background: #fff;
+    color: #3f51b5;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+header button:hover {
+    background-color: #e0e0e0;
 }
 
 .controls {
     margin: 20px 0;
     display: flex;
     gap: 20px;
+    background: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.controls label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .percentage {
     text-align: right;
+    padding: 10px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
 }
 
 .pie {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
-    border: 2px solid #f00;
+    border: 4px solid #3f51b5;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    background-color: #fff;
+    font-size: 14px;
+    background: linear-gradient(135deg, #e8eaf6, #fff);
     margin-left: auto;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .calendar {
-    background-color: white;
+    background: #fff;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .month-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: #3f51b5;
 }
 
 .month-nav button {
@@ -69,49 +123,57 @@ header {
     border: none;
     font-size: 20px;
     cursor: pointer;
+    color: #3f51b5;
+    transition: color 0.3s;
+}
+
+.month-nav button:hover {
+    color: #303f9f;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    background: #fff;
 }
 
 th, td {
     text-align: center;
-    padding: 10px;
-    border: 1px solid #ddd;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+}
+
+th {
+    background: #3f51b5;
+    color: white;
 }
 
 td {
     cursor: pointer;
-    position: relative;
+    transition: background-color 0.3s;
+}
+
+td:hover {
+    background-color: #f5f5f5;
 }
 
 .day-number {
     font-size: 16px;
+    font-weight: bold;
 }
 
 .attendance {
     display: block;
     margin-top: 5px;
-    padding: 2px 8px;
+    padding: 4px 12px;
     border-radius: 20px;
     font-size: 12px;
     color: white;
+    text-align: center;
 }
 
-.green {
-    background-color: green;
-}
-
-.yellow {
-    background-color: orange;
-}
-
-.red {
-    background-color: red;
-}
-
-.blue {
-    background-color: blue;
-}
+.green { background-color: #4caf50; }
+.yellow { background-color: #ffca28; }
+.red { background-color: #f44336; }
+.blue { background-color: #2196f3; }
