@@ -211,10 +211,6 @@
                     <div class="day-number">${day}</div>
                     ${display ? `<span class="attendance ${colorClass}">${display}</span>` : ''}
                 `;
-                if (isAdmin && selectedUid && dateStr > today) {
-                    td.style.cursor = 'not-allowed';
-                    td.onclick = null; // Disable for future dates even for admin if needed, but allow for planning
-                }
             }
         }
 
@@ -349,3 +345,4 @@
     </div>
 </body>
 </html>
+
