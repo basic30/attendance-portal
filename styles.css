@@ -104,12 +104,11 @@ header button:hover {
 
 /* Controls Section */
 .controls {
-    margin: 15px 0;
+    margin: 10px 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
     background: #fff;
-    padding: 10px; /* Reduced padding */
+    padding: 5px; /* Reduced padding */
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     align-items: center;
@@ -132,8 +131,12 @@ header button:hover {
 }
 
 .percentage {
-    font-size: 0.9rem;
-    margin-left: auto; /* Push to right */
+    text-align: right;
+    padding: 10px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
 }
 
 .pie {
@@ -390,3 +393,4 @@ td:hover {
         padding: 1px 4px;
     }
 }
+
