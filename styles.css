@@ -1,4 +1,4 @@
-/* Updated styles.css for mobile friendly and percentage position */
+/* Reset and base styles */
 * {
     margin: 0;
     padding: 0;
@@ -14,6 +14,7 @@ body {
     min-height: 100vh;
 }
 
+/* Login Screen */
 #login {
     text-align: center;
     margin: 20px auto;
@@ -48,6 +49,7 @@ body {
     background-color: #303f9f;
 }
 
+/* Dashboard Header */
 header {
     background: linear-gradient(90deg, #3f51b5, #5c6bc0);
     color: white;
@@ -75,6 +77,7 @@ header button:hover {
     background-color: #e0e0e0;
 }
 
+/* Admin Panel */
 #admin-panel {
     background: #fff;
     padding: 15px;
@@ -99,17 +102,17 @@ header button:hover {
     margin-top: 5px;
 }
 
+/* Controls Section */
 .controls {
     margin: 15px 0;
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     background: #fff;
-    padding: 15px;
+    padding: 10px; /* Reduced padding */
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     align-items: center;
-    justify-content: space-between;
 }
 
 .controls label {
@@ -117,6 +120,7 @@ header button:hover {
     align-items: center;
     gap: 5px;
     flex: 1 1 150px;
+    min-width: 0; /* Prevent overflow */
 }
 
 .controls input {
@@ -124,10 +128,12 @@ header button:hover {
     font-size: 0.9rem;
     border: 1px solid #ddd;
     border-radius: 4px;
+    width: 100%; /* Ensure input takes full width */
 }
 
 .percentage {
     font-size: 0.9rem;
+    margin-left: auto; /* Push to right */
 }
 
 .pie {
@@ -143,6 +149,7 @@ header button:hover {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+/* Calendar */
 .calendar {
     background: #fff;
     padding: 15px;
@@ -262,15 +269,25 @@ td:hover {
 
     .controls {
         flex-direction: column;
-        padding: 10px;
+        padding: 8px; /* Reduced further */
         gap: 5px;
-        align-items: flex-start;
+        align-items: stretch;
+    }
+
+    .controls label {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .controls input {
+        width: 100%;
     }
 
     .percentage {
         font-size: 0.8rem;
-        margin-top: 10px;
+        margin-top: 5px; /* Reduced margin */
         align-self: flex-end;
+        width: 60px; /* Fixed width for pie on mobile */
     }
 
     .pie {
@@ -338,11 +355,12 @@ td:hover {
     }
 
     .controls {
-        padding: 8px;
+        padding: 6px; /* Further reduced */
     }
 
     .percentage {
         font-size: 0.7rem;
+        margin-top: 3px; /* Minimal margin */
     }
 
     .pie {
